@@ -88,7 +88,7 @@ nrow(xdata)	# 405
 
 ## Add dominant modality from Lynott & Connell (2009):
 
-xdata$DominantModality <- ln[match(xagr$Word, ln$Word), ]$DominantModality
+xdata$DominantModality <- ln[match(xdata$Word, ln$Word), ]$DominantModality
 
 
 
@@ -168,7 +168,7 @@ axis(side = 2, at = seq(5, 6, 0.25), las = 2,
 mtext(text = 'Average context valence', side = 2, line = 3.5, cex = 1.65, font = 2)
 mtext(text = 'Context Valence', side = 3, line = 1, cex = 2, font = 2)
 # Inside plot:
-text(x = 0.625, y = 5.9, labels = '(a)', font = 2, cex = 1.45)
+text(x = 0.625, y = 5.95, labels = '(a)', font = 2, cex = 1.45)
 arrows(x0 = 1:5,
 	y0 = Val - 1.96 * ValSE, y1 = Val + 1.96 * ValSE,
 	length = 0.08, angle = 90, code = 3, lwd = 2)
@@ -212,16 +212,21 @@ adj <- mutate(adj,
 	AbsVal_z = AbsVal_c / sd(AbsVal, na.rm = T),
 	AbsSent_z = AbsSent_c / sd(AbsSent, na.rm = T))
 
+## Take subset of those that have complete cases:
+
+adj_warrcomplete <- filter(adj, !is.na(AbsVal_c))
+adj_hashcomplete <- filter(adj, !is.na(AbsSent_c))
+
 ## Lmer-analysis with absolute valence / context frequency interaction, Warriner:
 
 summary(xmdl <- lmer(LogFreq ~ AbsVal_z * DominantModality +
-	(1|Word) + (1|Noun) + (0+AbsVal_z|Word), adj, REML = F))
+	(1 + AbsVal_z|Word) + (1|Noun), adj_warrcomplete, REML = F))
 summary(xmdl.noint <- lmer(LogFreq ~ AbsVal_z + DominantModality +
-	(1|Word) + (1|Noun) + (0+AbsVal_z|Word), adj, REML = F))
+	(1 + AbsVal_z|Word) + (1|Noun), adj_warrcomplete, REML = F))
 summary(xmdl.noabsv <- lmer(LogFreq ~ 1 + DominantModality +
-	(1|Word) + (1|Noun) + (0+AbsVal_z|Word), adj, REML = F))
+	(1 + AbsVal_z|Word) + (1|Noun), adj_warrcomplete, REML = F))
 summary(xmdl.nodom <- lmer(LogFreq ~ AbsVal_z + 1 +
-	(1|Word) + (1|Noun) + (0+AbsVal_z|Word), adj, REML = F))
+	(1 + AbsVal_z|Word) + (1|Noun), adj_warrcomplete, REML = F))
 
 ## Likelihood ratio tests of these comparisons:
 
@@ -233,13 +238,13 @@ anova(xmdl.noint, xmdl, test = 'Chisq')
 ## Lmer-analysis with absolute valence / context frequency interaction, Twitter:
 
 summary(twit.mdl <- lmer(LogFreq ~ AbsSent_z * DominantModality +
-	(1|Word) + (1|Noun) + (0+AbsSent_z|Word), adj, REML = F))
+	(1 + AbsSent_z|Word) + (1|Noun), adj_hashcomplete, REML = F))
 summary(twit.mdl.noint <- lmer(LogFreq ~ AbsSent_z + DominantModality +
-	(1|Word) + (1|Noun) + (0+AbsSent_z|Word), adj, REML = F))
+	(1 + AbsSent_z|Word) + (1|Noun), adj_hashcomplete, REML = F))
 summary(twit.mdl.noabsv <- lmer(LogFreq ~ 1 + DominantModality +
-	(1|Word) + (1|Noun) + (0+AbsSent_z|Word), adj, REML = F))
+	(1 + AbsSent_z|Word) + (1|Noun), adj_hashcomplete, REML = F))
 summary(twit.mdl.nodom <- lmer(LogFreq ~ AbsSent_z + 1 +
-	(1|Word) + (1|Noun) + (0+AbsSent_z|Word), adj, REML = F))
+	(1 + AbsSent_z|Word) + (1|Noun), adj_hashcomplete, REML = F))
 
 ## Likelihood ratio tests of these comparisons:
 
@@ -273,18 +278,18 @@ quartz('', 11, 5)
 par(mfrow = c(1, 2), omi = c(1.1, 1.1, 0.85, 0.25), mai = c(0, 0.25, 0, 0))
 # Plot 1:
 plot(1, 1, typ = 'n',
-	xlim = c(-1, 6), ylim = c(0, 0.18),
+	xlim = c(-1, 6), ylim = c(0, 0.21),
 	xlab = '', ylab = '', xaxt = 'n', yaxt = 'n')
 box(lwd = 2)
 axis(side = 1, at = seq(-1, 5, 1), 
 	font = 2, cex.axis = 1.5, lwd.ticks = 2)
 mtext(text = 'Absolute Valence', side = 1, line = 3.5, cex = 2, font = 2)
-axis(side = 2, at = seq(0, 0.18, 0.03), las = 2,
+axis(side = 2, at = seq(0, 0.2, 0.04), las = 2,
 	font = 2, lwd.ticks = 2, cex.axis = 1.25)
 mtext(text = 'Word Frequency (log10)', side = 2, line = 3.5, cex = 1.65, font = 2)
 mtext(text = 'Warriner et al. (2013) norms', side = 3, line = 1, cex = 1.5, font = 2)
 # Inside plot:
-text(x = -0.8, y = 0.17, labels = '(a)', font = 2, cex = 1.45)
+text(x = -0.8, y = 0.1995, labels = '(a)', font = 2, cex = 1.45)
 for (i in 1:5) {
 	this_modality <- c('Auditory', 'Visual', 'Haptic', 'Gustatory', 'Olfactory')[i]
 	if (this_modality %in% c('Gustatory', 'Olfactory')) {
@@ -309,7 +314,7 @@ for (i in 1:5) {
 	}
 # Plot 2:
 plot(1, 1, typ = 'n',
-	xlim = c(-1, 6), ylim = c(0, 0.18),
+	xlim = c(-1, 6), ylim = c(0, 0.21),
 	xlab = '', ylab = '', xaxt = 'n', yaxt = 'n')
 box(lwd = 2)
 axis(side = 1, at = seq(-1, 5, 1), 
@@ -317,7 +322,7 @@ axis(side = 1, at = seq(-1, 5, 1),
 mtext(text = 'Absolute Valence', side = 1, line = 3.5, cex = 2, font = 2)
 mtext(text = 'Mohammad (2012) norms', side = 3, line = 1, cex = 1.5, font = 2)
 # Inside plot:
-text(x = -0.8, y = 0.17, labels = '(b)', font = 2, cex = 1.45)
+text(x = -0.8, y = 0.1995, labels = '(b)', font = 2, cex = 1.45)
 for (i in 1:5) {
 	this_modality <- c('Auditory', 'Visual', 'Haptic', 'Gustatory', 'Olfactory')[i]
 	if (this_modality %in% c('Gustatory', 'Olfactory')) {
@@ -326,17 +331,20 @@ for (i in 1:5) {
 		this_cex = 1.25
 		this_typeface = 2
 		this_color = 'black'
+		if (this_modality == 'Gustatory') yfac = -0.006
+		if (this_modality == 'Olfactory') yfac = 0.006
 		} else { line_type = 3
 			line_width = 1
 			this_cex = 0.9
 			this_typeface = 1
 			this_color = rgb(0.5, 0.5, 0.5, 1)
+			yfac = 0
 			}
 	xtemp <- newdata.twit[newdata.twit$DominantModality == this_modality, ]
 	points(xtemp$AbsSent_z, xtemp$LogFreq, type = 'l', lwd = 2,
 		lty = line_type, col = this_color)
 	this_label <- substr(xtemp[1, ]$DominantModality, 1, 3)
-	text(x = 5.5, y = xtemp[nrow(xtemp), ]$LogFreq,
+	text(x = 5.5, y = xtemp[nrow(xtemp), ]$LogFreq + yfac,
 		labels = this_label,
 		font = this_typeface, cex = this_cex, col = this_color)
 	}

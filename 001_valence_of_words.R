@@ -10,6 +10,7 @@
 ## Load in libraries:
 
 library(dplyr)
+library(effsize)
 
 ## Set options:
 

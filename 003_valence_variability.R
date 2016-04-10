@@ -66,7 +66,7 @@ nrow(xdata)	# 405
 
 ## Add dominant modality from Lynott & Connell (2009):
 
-xdata$DominantModality <- ln[match(xagr$Word, ln$Word), ]$DominantModality
+xdata$DominantModality <- ln[match(xdata$Word, ln$Word), ]$DominantModality
 
 
 
@@ -113,7 +113,7 @@ newdata$SentSE <- predict(Sent.mdl, newdata, se.fit = T)[[2]]
 
 attach(newdata)
 quartz('', 11, 5)
-par(mfrow = c(1, 2), omi = c(1.1, 1.1, 0.85, 0.25), mai = c(0, 0.25, 0, 0))
+par(mfrow = c(1, 2), omi = c(1.1, 1.1, 0.85, 0.65), mai = c(0, 0.25, 0, 0))
 # Plot 1:
 plot(1, 1, typ = 'n',
 	xlim = c(0.5, 5.5), ylim = c(0.8, 1.4),
@@ -134,7 +134,7 @@ arrows(x0 = 1:5,
 points(x = 1:5, y = Val, pch = 15, cex = 1.25)
 # Plot 2:
 plot(1, 1, typ = 'n',
-	xlim = c(0.5, 5.5), ylim = c(0.8, 1.4),
+	xlim = c(0.5, 5.5), ylim = c(0.6, 1.2),
 	xlab = '', ylab = '', xaxt = 'n', yaxt = 'n')
 box(lwd = 2)
 axis(side = 1, at = 1:5, labels = c('Vis', 'Hap', 'Aud', 'Gus', 'Olf'),
@@ -144,9 +144,11 @@ mtext(text = 'Mohammad (2012) norms', side = 3, line = 1, cex = 1.5, font = 2)
 # Inside plot:
 text(x = 0.625, y = 1.37, labels = '(b)', font = 2, cex = 1.45)
 arrows(x0 = 1:5,
-	y0 = AbsVal - 1.96 * AbsValSE, y1 = AbsVal + 1.96 * AbsValSE,
+	y0 = Sent - 1.96 * SentSE, y1 = Sent + 1.96 * SentSE,
 	length = 0.08, angle = 90, code = 3, lwd = 2)
-points(x = 1:5, y = AbsVal, pch = 15, cex = 1.25)
+points(x = 1:5, y = Sent, pch = 15, cex = 1.25)
+axis(side = 4, at = seq(0.6, 1.2, 0.2), las = 2,
+	font = 2, lwd.ticks = 2, cex.axis = 1.25)
 detach(newdata)
 
 
